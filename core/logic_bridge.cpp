@@ -585,13 +585,13 @@ bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char 
 	if (useridp)
 		*useridp = ::engine->GetPlayerUserId(player->GetEdict());
 	if (teamnamep && player->IsInGame()) {
-        IPlayerInfo *pInfo = player->GetPlayerInfo();
-        if (pInfo) {
-            int teamindex = bridge->playerInfo->GetTeamIndex(pInfo);
-            const char *teamname = tools_GetTeamName(teamindex); // TODO
-            *teamnamep = (teamname && *teamname) ? teamname : "NO_TEAM_NAME";
-        }
-    }
+		IPlayerInfo *pInfo = player->GetPlayerInfo();
+		if (pInfo) {
+			int teamindex = bridge->playerInfo->GetTeamIndex(pInfo);
+			const char *teamname = tools_GetTeamName(teamindex); // TODO
+			*teamnamep = (teamname && *teamname) ? teamname : "NO_TEAM_NAME";
+		}
+	}
 	return true;
 }
 
