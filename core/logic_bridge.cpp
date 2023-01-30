@@ -570,7 +570,7 @@ int CoreProviderImpl::MaxClients()
 	return g_Players.MaxClients();
 }
 
-bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char **authp, int *useridp)
+bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char **authp, int *useridp, const char **teamnamep)
 {
 	CPlayer *player = g_Players.GetPlayerByIndex(index);
 	if (!player || !player->IsConnected())
@@ -584,6 +584,13 @@ bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char 
 	}
 	if (useridp)
 		*useridp = ::engine->GetPlayerUserId(player->GetEdict());
+	if (teamnamep && player->IsInGame()) {
+        IPlayerInfo *pInfo = player->GetPlayerInfo();
+        if (pInfo) {
+            int teamindex = bridge->playerInfo->GetTeamIndex(pInfo);
+            *teamnamep = 
+        }
+    }
 	return true;
 }
 

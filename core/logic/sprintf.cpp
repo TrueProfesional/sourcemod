@@ -1168,11 +1168,12 @@ reswitch:
 				{
 					const char *name;
 					const char *auth;
+					const char *teamname;
 					int userid;
-					if (!bridge->DescribePlayer(*value, &name, &auth, &userid))
+					if (!bridge->DescribePlayer(*value, &name, &auth, &userid, &teamname))
 						return pCtx->ThrowNativeError("Client index %d is invalid (arg %d)", *value, arg);
 					
-					ke::SafeSprintf(buffer, sizeof(buffer), "%s<%d><%s><>", name, userid, auth);
+					ke::SafeSprintf(buffer, sizeof(buffer), "%s<%d><%s><%s>", name, userid, auth, teamname);
 				}
 				else
 				{
@@ -1191,7 +1192,7 @@ reswitch:
 
 				const char *name = "Console";
 				if (*value) {
-					if (!bridge->DescribePlayer(*value, &name, nullptr, nullptr))
+					if (!bridge->DescribePlayer(*value, &name, nullptr, nullptr, nullptr))
 						return pCtx->ThrowNativeError("Client index %d is invalid (arg %d)", *value, arg);
 				}
 				if (!AddString(&buf_p, llen, name, width, prec, flags))
