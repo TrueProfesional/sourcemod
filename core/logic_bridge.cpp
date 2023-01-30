@@ -588,7 +588,8 @@ bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char 
         IPlayerInfo *pInfo = player->GetPlayerInfo();
         if (pInfo) {
             int teamindex = bridge->playerInfo->GetTeamIndex(pInfo);
-            *teamnamep = 
+			const char *teamname = tools_GetTeamName(teamindex); // TODO
+            *teamnamep = (teamname && *teamname) ? teamname : "NO_TEAM_NAME";
         }
     }
 	return true;
