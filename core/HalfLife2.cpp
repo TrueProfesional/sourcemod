@@ -1557,3 +1557,91 @@ uint64_t CHalfLife2::GetServerSteamId64() const
 
 	return 1ULL;
 }
+
+const char *CHalfLife2::GetTeamName(int team)
+{
+	this->InitTeamInfo();
+
+	if (size_t(team) >= this->m_Teams.size())
+		return NULL;
+	if (this->m_nTeamnameOffset == 0)
+		return NULL;
+	if (this->m_nTeamnameOffset == -1)
+	{
+		SendProp *prop = this->FindInSendTable(this->m_Teams[team].ClassName, "m_szTeamname");
+		if (prop == NULL)
+		{
+			this->m_nTeamnameOffset = 0;
+			return NULL;
+		}
+		this->m_nTeamnameOffset = prop->GetOffset();
+	}
+
+	return (const char *)((unsigned char *)this->m_Teams[team].pEnt + this->m_nTeamnameOffset);
+}
+
+void CHalfLife2::InitTeamInfo()
+{
+	this->m_Teams.clear();
+	this->m_Teams.resize(1);
+
+	int edictCount = gpGlobals->maxEntities;
+
+	for (int i=0; i<edictCount; i++)
+	{
+		edict_t *pEdict = PEntityOfEntIndex(i);
+		if (!pEdict || pEdict->IsFree())
+		{
+			continue;
+		}
+		if (!pEdict->GetNetworkable())
+		{
+			continue;
+		}
+
+		ServerClass *pClass = pEdict->GetNetworkable()->GetServerClass();
+		if (this->FindNestedDataTable(pClass->m_pTable, "DT_Team"))
+		{
+			SendProp *pTeamNumProp = this->FindInSendTable(pClass->GetName(), "m_iTeamNum");
+
+			if (pTeamNumProp != NULL)
+			{
+				int offset = pTeamNumProp->GetOffset();
+				CBaseEntity *pEnt = pEdict->GetUnknown()->GetBaseEntity();
+				int TeamIndex = *(int *)((unsigned char *)pEnt + offset);
+
+				if (TeamIndex >= (int)this->m_Teams.size())
+				{
+					this->m_Teams.resize(TeamIndex+1);
+				}
+				this->m_Teams[TeamIndex].ClassName = pClass->GetName();
+				this->m_Teams[TeamIndex].pEnt = pEnt;
+			}
+		}
+	}
+}
+
+bool CHalfLife2::FindNestedDataTable(SendTable *pTable, const char *name)
+{
+	if (strcmp(pTable->GetName(), name) == 0)
+	{
+		return true;
+	}
+
+	int props = pTable->GetNumProps();
+	SendProp *prop;
+
+	for (int i=0; i<props; i++)
+	{
+		prop = pTable->GetProp(i);
+		if (prop->GetDataTable())
+		{
+			if (this->FindNestedDataTable(prop->GetDataTable(), name))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}

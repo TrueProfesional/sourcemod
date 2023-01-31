@@ -179,6 +179,12 @@ enum class SMFindMapResult : cell_t {
 	PossiblyAvailable
 };
 
+struct TeamInfo
+{
+	const char *ClassName;
+	CBaseEntity *pEnt;
+};
+
 #if SOURCE_ENGINE >= SE_LEFT4DEAD && defined PLATFORM_WINDOWS
 template< class T, class I = int >
 class CUtlMemoryGlobalMalloc;
@@ -242,6 +248,7 @@ public: //IGameHelpers
 	string_t AllocPooledString(const char *pszValue);
 	bool GetServerSteam3Id(char *pszOut, size_t len) const override;
 	uint64_t GetServerSteamId64() const override;
+	const char *GetTeamName(int team);
 public:
 	void AddToFakeCliCmdQueue(int client, int userid, const char *cmd);
 	void ProcessFakeCliCmdQueue();
@@ -254,9 +261,11 @@ private:
 	void PushCommandStack(const ICommandArgs *cmd);
 	void PopCommandStack();
 	DataTableInfo *_FindServerClass(const char *classname);
+	bool FindNestedDataTable(SendTable *pTable, const char *name);
 private:
 	void InitLogicalEntData();
 	void InitCommandLine();
+	void InitTeamInfo();
 private:
 	typedef ke::HashMap<datamap_t *, DataMapCache *, ke::PointerPolicy<datamap_t> > DataTableMap;
 
@@ -271,6 +280,8 @@ private:
 	CStack<CachedCommandInfo> m_CommandStack;
 	Queue<DelayedKickInfo> m_DelayedKicks;
 	void *m_pGetCommandLine;
+	std::vector<TeamInfo> m_Teams;
+	int m_nTeamnameOffset = -1;
 #if SOURCE_ENGINE == SE_CSGO
 public:
 	bool CanSetCSGOEntProp(const char *pszPropName)
