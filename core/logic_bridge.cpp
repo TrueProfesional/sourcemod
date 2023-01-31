@@ -570,6 +570,104 @@ int CoreProviderImpl::MaxClients()
 	return g_Players.MaxClients();
 }
 
+struct TeamInfo
+{
+	const char *ClassName;
+	CBaseEntity *pEnt;
+};
+
+SourceHook::CVector<TeamInfo> g_Teams;
+
+bool FindNestedDataTable(SendTable *pTable, const char *name)
+{
+	if (strcmp(pTable->GetName(), name) == 0)
+	{
+		return true;
+	}
+
+	int props = pTable->GetNumProps();
+	SendProp *prop;
+
+	for (int i=0; i<props; i++)
+	{
+		prop = pTable->GetProp(i);
+		if (prop->GetDataTable())
+		{
+			if (FindNestedDataTable(prop->GetDataTable(), name))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void InitTeamNatives()
+{
+	g_Teams.clear();
+	g_Teams.resize(1);
+
+	int edictCount = gpGlobals->maxEntities;
+
+	for (int i=0; i<edictCount; i++)
+	{
+		edict_t *pEdict = PEntityOfEntIndex(i);
+		if (!pEdict || pEdict->IsFree())
+		{
+			continue;
+		}
+		if (!pEdict->GetNetworkable())
+		{
+			continue;
+		}
+
+		ServerClass *pClass = pEdict->GetNetworkable()->GetServerClass();
+		if (FindNestedDataTable(pClass->m_pTable, "DT_Team"))
+		{
+			SendProp *pTeamNumProp = g_HL2.FindInSendTable(pClass->GetName(), "m_iTeamNum");
+
+			if (pTeamNumProp != NULL)
+			{
+				int offset = pTeamNumProp->GetOffset();
+				CBaseEntity *pEnt = pEdict->GetUnknown()->GetBaseEntity();
+				int TeamIndex = *(int *)((unsigned char *)pEnt + offset);
+
+				if (TeamIndex >= (int)g_Teams.size())
+				{
+					g_Teams.resize(TeamIndex+1);
+				}
+				g_Teams[TeamIndex].ClassName = pClass->GetName();
+				g_Teams[TeamIndex].pEnt = pEnt;
+			}
+		}
+	}
+}
+
+static int g_teamname_offset = -1;
+
+const char *tools_GetTeamName(int team)
+{
+	InitTeamNatives();
+
+	if (size_t(team) >= g_Teams.size())
+		return NULL;
+	if (g_teamname_offset == 0)
+		return NULL;
+	if (g_teamname_offset == -1)
+	{
+		SendProp *prop = g_HL2.FindInSendTable(g_Teams[team].ClassName, "m_szTeamname");
+		if (prop == NULL)
+		{
+			g_teamname_offset = 0;
+			return NULL;
+		}
+		g_teamname_offset = prop->GetOffset();
+	}
+
+	return (const char *)((unsigned char *)g_Teams[team].pEnt + g_teamname_offset);
+}
+
 bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char **authp, int *useridp, const char **teamnamep)
 {
 	CPlayer *player = g_Players.GetPlayerByIndex(index);
@@ -587,7 +685,7 @@ bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char 
 	if (teamnamep && player->IsInGame()) {
 		IPlayerInfo *pInfo = player->GetPlayerInfo();
 		if (pInfo) {
-			int teamindex = bridge->playerInfo->GetTeamIndex(pInfo);
+			int teamindex = playerinfo_wrapper.GetTeamIndex(pInfo);
 			const char *teamname = tools_GetTeamName(teamindex); // TODO
 			*teamnamep = (teamname && *teamname) ? teamname : "NO_TEAM_NAME";
 		}
