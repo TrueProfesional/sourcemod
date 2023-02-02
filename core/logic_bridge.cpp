@@ -587,9 +587,8 @@ bool CoreProviderImpl::DescribePlayer(int index, const char **namep, const char 
 	if (teamnamep && player->IsInGame()) {
 		IPlayerInfo *pInfo = player->GetPlayerInfo();
 		if (pInfo) {
-			int teamindex = playerinfo_wrapper.GetTeamIndex(pInfo);
-			const char *teamname = g_HL2.GetTeamName(teamindex); // TODO
-			*teamnamep = (teamname && *teamname) ? teamname : "NO_TEAM_NAME";
+			const char *teamname = g_HL2.GetTeamName(playerinfo_wrapper.GetTeamIndex(pInfo));
+			*teamnamep = (teamname && *teamname) ? teamname : "";
 		}
 	}
 	return true;

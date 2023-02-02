@@ -1558,21 +1558,24 @@ uint64_t CHalfLife2::GetServerSteamId64() const
 	return 1ULL;
 }
 
-const char *CHalfLife2::GetTeamName(int team)
+void CHalfLife2::OnSourceModLevelActivated()
 {
 	this->InitTeamInfo();
+}
 
+const char *CHalfLife2::GetTeamName(int team)
+{
 	if (size_t(team) >= this->m_Teams.size())
-		return NULL;
+		return nullptr;
 	if (this->m_nTeamnameOffset == 0)
-		return NULL;
+		return nullptr;
 	if (this->m_nTeamnameOffset == -1)
 	{
 		SendProp *prop = this->FindInSendTable(this->m_Teams[team].ClassName, "m_szTeamname");
-		if (prop == NULL)
+		if (prop == nullptr)
 		{
 			this->m_nTeamnameOffset = 0;
-			return NULL;
+			return nullptr;
 		}
 		this->m_nTeamnameOffset = prop->GetOffset();
 	}
@@ -1604,7 +1607,7 @@ void CHalfLife2::InitTeamInfo()
 		{
 			SendProp *pTeamNumProp = this->FindInSendTable(pClass->GetName(), "m_iTeamNum");
 
-			if (pTeamNumProp != NULL)
+			if (pTeamNumProp != nullptr)
 			{
 				int offset = pTeamNumProp->GetOffset();
 				CBaseEntity *pEnt = pEdict->GetUnknown()->GetBaseEntity();

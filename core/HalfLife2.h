@@ -203,6 +203,7 @@ public:
 	void OnSourceModStartup(bool late);
 	void OnSourceModAllInitialized();
 	void OnSourceModAllInitialized_Post();
+	void OnSourceModLevelActivated();
 	/*void OnSourceModAllShutdown();*/
 	ConfigResult OnSourceModConfigChanged(const char *key, const char *value,
 		ConfigSource source, char *error, size_t maxlength) override;
