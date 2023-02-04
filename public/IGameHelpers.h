@@ -40,7 +40,7 @@
  */
 
 #define SMINTERFACE_GAMEHELPERS_NAME		"IGameHelpers"
-#define SMINTERFACE_GAMEHELPERS_VERSION		11
+#define SMINTERFACE_GAMEHELPERS_VERSION		12
 
 class CBaseEntity;
 class CBaseHandle;
@@ -351,6 +351,15 @@ namespace SourceMod
 		 * @return				64-bit server Steam id.
 		 */
 		virtual uint64_t GetServerSteamId64() const =0;
+
+		/**
+		 * @brief Retrieves a team name
+		 *
+		 * @param team			Team index.
+		 * @return				Pointer to the string, nullptr 
+		 *						on failure.
+		 */
+		virtual const char *GetTeamName(int team) =0;
 	};
 }
 

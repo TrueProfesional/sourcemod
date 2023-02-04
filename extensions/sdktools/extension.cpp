@@ -44,7 +44,6 @@
 #include "gamerulesnatives.h"
 #include <ISDKTools.h>
 #include "clientnatives.h"
-#include "teamnatives.h"
 #include "filesystem.h"
 #include "am-string.h"
 
@@ -102,7 +101,6 @@ extern sp_nativeinfo_t g_TRNatives[];
 extern sp_nativeinfo_t g_StringTableNatives[];
 extern sp_nativeinfo_t g_VoiceNatives[];
 extern sp_nativeinfo_t g_EntInputNatives[];
-extern sp_nativeinfo_t g_TeamNatives[];
 extern sp_nativeinfo_t g_GameRulesNatives[];
 extern sp_nativeinfo_t g_ClientNatives[];
 
@@ -140,7 +138,6 @@ bool SDKTools::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	sharesys->AddNatives(myself, g_VoiceNatives);
 	sharesys->AddNatives(myself, g_VariantTNatives);
 	sharesys->AddNatives(myself, g_EntInputNatives);
-	sharesys->AddNatives(myself, g_TeamNatives);
 	sharesys->AddNatives(myself, g_EntOutputNatives);
 	sharesys->AddNatives(myself, g_GameRulesNatives);
 	sharesys->AddNatives(myself, g_ClientNatives);
@@ -371,7 +368,6 @@ void SDKTools::SDK_OnAllLoaded()
 
 void SDKTools::OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax)
 {
-	InitTeamNatives();
 	GetResourceEntity();
 	g_Hooks.OnMapStart();
 }
@@ -500,7 +496,7 @@ bool SDKTools::ProcessCommandTarget(cmd_target_info_t *info)
 	}
 	else if (strcmp(info->pattern, "@spec") == 0)
 	{
-		const char *teamname = tools_GetTeamName(1);
+		const char *teamname = g_pGameHelpers->GetTeamName(1);
 		if (strcasecmp(teamname, "spectator") != 0)
 			return false;
 		info->num_targets = 0;

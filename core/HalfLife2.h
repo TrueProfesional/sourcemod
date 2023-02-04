@@ -251,6 +251,10 @@ public: //IGameHelpers
 	uint64_t GetServerSteamId64() const override;
 	const char *GetTeamName(int team);
 public:
+	std::vector<TeamInfo> GetTeamInfoVector();
+	TeamInfo GetTeamInfo(int teamindex);
+	int GetTeamnameOffset();
+public:
 	void AddToFakeCliCmdQueue(int client, int userid, const char *cmd);
 	void ProcessFakeCliCmdQueue();
 public:

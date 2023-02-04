@@ -1563,26 +1563,6 @@ void CHalfLife2::OnSourceModLevelActivated()
 	this->InitTeamInfo();
 }
 
-const char *CHalfLife2::GetTeamName(int team)
-{
-	if (size_t(team) >= this->m_Teams.size())
-		return nullptr;
-	if (this->m_nTeamnameOffset == 0)
-		return nullptr;
-	if (this->m_nTeamnameOffset == -1)
-	{
-		SendProp *prop = this->FindInSendTable(this->m_Teams[team].ClassName, "m_szTeamname");
-		if (prop == nullptr)
-		{
-			this->m_nTeamnameOffset = 0;
-			return nullptr;
-		}
-		this->m_nTeamnameOffset = prop->GetOffset();
-	}
-
-	return (const char *)((unsigned char *)this->m_Teams[team].pEnt + this->m_nTeamnameOffset);
-}
-
 void CHalfLife2::InitTeamInfo()
 {
 	this->m_Teams.clear();
@@ -1624,6 +1604,21 @@ void CHalfLife2::InitTeamInfo()
 	}
 }
 
+std::vector<TeamInfo> CHalfLife2::GetTeamInfoVector()
+{
+	return this->m_Teams;
+}
+
+TeamInfo CHalfLife2::GetTeamInfo(int teamindex)
+{
+	return this->m_Teams[teamindex];
+}
+
+int CHalfLife2::GetTeamnameOffset()
+{
+	return this->m_nTeamnameOffset;
+}
+
 bool CHalfLife2::FindNestedDataTable(SendTable *pTable, const char *name)
 {
 	if (strcmp(pTable->GetName(), name) == 0)
@@ -1647,4 +1642,24 @@ bool CHalfLife2::FindNestedDataTable(SendTable *pTable, const char *name)
 	}
 
 	return false;
+}
+
+const char *CHalfLife2::GetTeamName(int team)
+{
+	if (size_t(team) >= this->m_Teams.size())
+		return nullptr;
+	if (this->m_nTeamnameOffset == 0)
+		return nullptr;
+	if (this->m_nTeamnameOffset == -1)
+	{
+		SendProp *prop = this->FindInSendTable(this->m_Teams[team].ClassName, "m_szTeamname");
+		if (prop == nullptr)
+		{
+			this->m_nTeamnameOffset = 0;
+			return nullptr;
+		}
+		this->m_nTeamnameOffset = prop->GetOffset();
+	}
+
+	return (const char *)((unsigned char *)this->m_Teams[team].pEnt + this->m_nTeamnameOffset);
 }

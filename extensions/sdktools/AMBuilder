@@ -10,7 +10,6 @@ project.sources += [
   'outputnatives.cpp',
   'tempents.cpp',
   'tenatives.cpp',
-  'teamnatives.cpp',
   'trnatives.cpp',
   'vcaller.cpp',
   'vcallbuilder.cpp',
